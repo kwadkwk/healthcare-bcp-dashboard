@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare BCP Program - Implementation Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 1.1em;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .chart-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .chart-title {
+            font-size: 1.4em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+        }
+
+        .insights-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .insights-title {
+            font-size: 1.8em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .insight-item {
+            padding: 15px;
+            margin: 15px 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+
+        .insight-item h4 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .insight-item p {
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9em;
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-tab {
+            padding: 12px 25px;
+            border: none;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+            border-radius: 10px;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-tab.active, .nav-tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-wrapper {
+                height: 300px;
+            }
+            
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Healthcare BCP Program Dashboard</h1>
+            <p>Comprehensive Business Continuity Implementation for 5,400+ Employee Healthcare Organization</p>
+            <div style="display: flex; justify-content: center; gap: 20px; margin-top: 20px; flex-wrap: wrap;">
+                <span style="padding: 8px 16px; background: linear-gradient(45deg, #4CAF50, #45a049); color: white; border-radius: 20px; font-weight: 500;">Program Complete</span>
+                <span style="padding: 8px 16px; background: linear-gradient(45deg, #2196F3, #1976D2); color: white; border-radius: 20px; font-weight: 500;">$2.4M Investment</span>
+                <span style="padding: 8px 16px; background: linear-gradient(45deg, #FF9800, #F57C00); color: white; border-radius: 20px; font-weight: 500;">162% ROI</span>
+            </div>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('overview')">Overview</button>
+            <button class="nav-tab" onclick="showTab('implementation')">Implementation</button>
+            <button class="nav-tab" onclick="showTab('performance')">Performance</button>
+            <button class="nav-tab" onclick="showTab('financial')">Financial</button>
+        </div>
+
+        <div id="overview" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Critical Functions Protected</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">4h</div>
+                    <div class="stat-label">Average RTO</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">99.9%</div>
+                    <div class="stat-label">System Uptime</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">95%</div>
+                    <div class="stat-label">Staff Training Complete</div>
+                </div>
+            </div>
+
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <div class="chart-title">Risk Assessment Matrix</div>
+                    <div class="chart-wrapper">
+                        <canvas id="riskChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Recovery Time Objectives by Function</div>
+                    <div class="chart-wrapper">
+                        <canvas id="rtoChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="implementation" class="tab-content">
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <div class="chart-title">Implementation Phase Progress</div>
+                    <div class="chart-wrapper">
+                        <canvas id="phaseChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Testing Performance 2024</div>
+                    <div class="chart-wrapper">
+                        <canvas id="testingChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="performance" class="tab-content">
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <div class="chart-title">System Uptime Performance</div>
+                    <div class="chart-wrapper">
+                        <canvas id="uptimeChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Training Effectiveness</div>
+                    <div class="chart-wrapper">
+                        <canvas id="trainingChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="financial" class="tab-content">
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <div class="chart-title">Program Investment Breakdown</div>
+                    <div class="chart-wrapper">
+                        <canvas id="investmentChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Cost Avoidance Analysis</div>
+                    <div class="chart-wrapper">
+                        <canvas id="costAvoidanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="insights-section">
+            <h2 class="insights-title">Key Insights & Achievements</h2>
+            
+            <div class="insight-item">
+                <h4>Exceptional Implementation Success</h4>
+                <p>Completed comprehensive BCP program 5% under budget ($2.28M vs $2.40M allocated) with all critical phases meeting or exceeding targets. Phase 4 completed 3 days ahead of schedule.</p>
+            </div>
+            
+            <div class="insight-item">
+                <h4>Outstanding ROI Achievement</h4>
+                <p>Delivered 162% annual return on investment through cost avoidance of $15.18M, including $8.5M in prevented data breaches and $3.02M in business interruption savings.</p>
+            </div>
+            
+            <div class="insight-item">
+                <h4>Superior System Reliability</h4>
+                <p>Achieved 99.97% uptime for EHR systems, exceeding the 99.9% target. All critical systems maintained above-target performance with average recovery times well within objectives.</p>
+            </div>
+            
+            <div class="insight-item">
+                <h4>Comprehensive Staff Preparedness</h4>
+                <p>95% staff training completion rate across 5,400+ employees, with 100% crisis team certification and 98% department champion training completion.</p>
+            </div>
+            
+            <div class="insight-item">
+                <h4>Robust Testing Program</h4>
+                <p>Executed 64+ exercises annually with 92% success rate in full-scale simulations and 94% functional test success rate, ensuring readiness across all scenarios.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Healthcare BCP Program Dashboard | Implementation Complete July 2025 | Next Review: July 2026</p>
+        </div>
+    </div>
+
+    <script>
+        // Chart.js default configuration
+        Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+        Chart.defaults.plugins.legend.position = 'bottom';
+
+        // Risk Assessment Matrix
+        const riskCtx = document.getElementById('riskChart').getContext('2d');
+        new Chart(riskCtx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Critical Risks',
+                    data: [{x: 9, y: 9}, {x: 8.5, y: 9.5}, {x: 9.5, y: 8.5}],
+                    backgroundColor: '#FF4444',
+                    pointRadius: 8
+                }, {
+                    label: 'High Risks',
+                    data: [{x: 7, y: 8}, {x: 8, y: 7}, {x: 7.5, y: 7.5}, {x: 6.5, y: 8.5}],
+                    backgroundColor: '#FF8800',
+                    pointRadius: 6
+                }, {
+                    label: 'Medium Risks',
+                    data: [{x: 5, y: 6}, {x: 6, y: 5}, {x: 4.5, y: 5.5}, {x: 5.5, y: 4.5}, {x: 4, y: 6}],
+                    backgroundColor: '#FFDD00',
+                    pointRadius: 4
+                }, {
+                    label: 'Low Risks',
+                    data: [{x: 2, y: 3}, {x: 3, y: 2}, {x: 1.5, y: 2.5}, {x: 2.5, y: 1.5}],
+                    backgroundColor: '#44AA44',
+                    pointRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Probability' },
+                        min: 0, max: 10
+                    },
+                    y: {
+                        title: { display: true, text: 'Impact' },
+                        min: 0, max: 10
+                    }
+                }
+            }
+        });
+
+        // RTO Chart
+        const rtoCtx = document.getElementById('rtoChart').getContext('2d');
+        new Chart(rtoCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Patient Care', 'Emergency', 'Pharmacy', 'Lab Services', 'IT Infra', 'Billing', 'HR Payroll', 'Legal Docs'],
+                datasets: [{
+                    label: 'RTO (Hours)',
+                    data: [2, 1, 3, 4, 2, 12, 16, 8],
+                    backgroundColor: [
+                        '#FF4444', '#FF4444', '#FF4444', '#FF4444',
+                        '#FF4444', '#FF8800', '#FF8800', '#FF8800'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: 'Hours' } }
+                }
+            }
+        });
+
+        // Implementation Phase Chart
+        const phaseCtx = document.getElementById('phaseChart').getContext('2d');
+        new Chart(phaseCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Phase 1\n(Foundation)', 'Phase 2\n(Development)', 'Phase 3\n(Testing)', 'Phase 4\n(Launch)'],
+                datasets: [{
+                    label: 'Completion %',
+                    data: [100, 98, 95, 100],
+                    backgroundColor: ['#2E8B57', '#2E8B57', '#FF6B35', '#2E8B57']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, max: 100, title: { display: true, text: 'Completion %' } }
+                }
+            }
+        });
+
+        // Testing Performance Chart
+        const testingCtx = document.getElementById('testingChart').getContext('2d');
+        new Chart(testingCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Tabletop Exercises', 'Functional Testing', 'Full-Scale Simulation'],
+                datasets: [{
+                    label: 'Planned',
+                    data: [48, 16, 1],
+                    backgroundColor: '#E3F2FD'
+                }, {
+                    label: 'Completed',
+                    data: [47, 16, 1],
+                    backgroundColor: '#2196F3'
+                }, {
+                    label: 'Successful',
+                    data: [46, 15, 1],
+                    backgroundColor: '#4CAF50'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // System Uptime Chart
+        const uptimeCtx = document.getElementById('uptimeChart').getContext('2d');
+        new Chart(uptimeCtx, {
+            type: 'bar',
+            data: {
+                labels: ['EHR System', 'Network Infra', 'Pharmacy', 'Lab Systems', 'Financial'],
+                datasets: [{
+                    label: 'Actual Uptime %',
+                    data: [99.97, 99.95, 99.92, 99.89, 99.94],
+                    backgroundColor: '#4CAF50'
+                }, {
+                    label: 'Target Uptime %',
+                    data: [99.9, 99.9, 99.9, 99.9, 99.9],
+                    backgroundColor: '#FFD54F'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { min: 99.8, max: 100 }
+                }
+            }
+        });
+
+        // Training Effectiveness Chart
+        const trainingCtx = document.getElementById('trainingChart').getContext('2d');
+        new Chart(trainingCtx, {
+            type: 'radar',
+            data: {
+                labels: ['BCP Training', 'Crisis Team Cert', 'Dept Champion', 'New Hire Orient', 'Exercise Participation', 'Skill Assessment'],
+                datasets: [{
+                    label: 'Achievement %',
+                    data: [95, 100, 98, 93, 89, 86],
+                    backgroundColor: 'rgba(76,175,80,0.2)',
+                    borderColor: '#4CAF50',
+                    pointBackgroundColor: '#4CAF50'
+                }, {
+                    label: 'Target %',
+                    data: [90, 100, 95, 90, 85, 85],
+                    backgroundColor: 'rgba(255,193,7,0.2)',
+                    borderColor: '#FFC107',
+                    pointBackgroundColor: '#FFC107'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: { beginAtZero: true, max: 100 }
+                }
+            }
+        });
+
+        // Investment Breakdown Chart
+        const investmentCtx = document.getElementById('investmentChart').getContext('2d');
+        new Chart(investmentCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Personnel (50%)', 'Technology (25%)', 'Training (10%)', 'Testing (7.5%)', 'External Services (7.5%)'],
+                datasets: [{
+                    data: [1200000, 600000, 240000, 180000, 180000],
+                    backgroundColor: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        // Cost Avoidance Chart
+        const costCtx = document.getElementById('costAvoidanceChart').getContext('2d');
+        new Chart(costCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Data Breaches', 'Business Interruption', 'System Outages', 'Regulatory Fines'],
+                datasets: [{
+                    label: 'Potential Cost ($M)',
+                    data: [8.5, 3.2, 2.4, 1.5],
+                    backgroundColor: '#FF6B6B'
+                }, {
+                    label: 'Actual Impact ($M)',
+                    data: [0, 0.18, 0.24, 0],
+                    backgroundColor: '#4ECDC4'
+                }, {
+                    label: 'Cost Avoided ($M)',
+                    data: [8.5, 3.02, 2.16, 1.5],
+                    backgroundColor: '#45B7D1'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: 'Cost (Millions USD)' } }
+                }
+            }
+        });
+
+        // Tab switching functionality
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        // Add some interactive effects
+        document.querySelectorAll('.stat-card').forEach(card => {
+            card.addEventListener('click', function() {
+                this.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    this.style.transform = 'translateY(-10px)';
+                }, 200);
+            });
+        });
+    </script>
+</body>
+</html>
