@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare BCP Program Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #3b82f6;
+        }
+
+        .header h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .header-subtitle {
+            font-size: 1.125rem;
+            color: #64748b;
+            margin-bottom: 24px;
+        }
+
+        .header-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .meta-item {
+            text-align: center;
+        }
+
+        .meta-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .meta-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .card h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-icon {
+            width: 20px;
+            height: 20px;
+            background: #3b82f6;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .metric-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-success { color: #059669; }
+        .status-success .status-dot { background: #10b981; }
+        
+        .status-warning { color: #d97706; }
+        .status-warning .status-dot { background: #f59e0b; }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+            border-radius: 4px;
+            transition: width 1s ease-out;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 16px 0;
+        }
+
+        .highlight-card {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            grid-column: 1 / -1;
+        }
+
+        .highlight-card h3 {
+            color: white;
+        }
+
+        .highlight-value {
+            font-size: 3rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 16px 0;
+        }
+
+        .highlight-description {
+            text-align: center;
+            font-size: 1.125rem;
+            opacity: 0.9;
+        }
+
+        .department-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .department-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px 12px;
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #475569;
+            transition: all 0.2s ease;
+        }
+
+        .department-item:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #3b82f6;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .footer {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            margin-top: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.875rem;
+            }
+            
+            .highlight-value {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Healthcare BCP Program Dashboard</h1>
+            <div class="header-subtitle">
+                Comprehensive Business Continuity Implementation for 5,400+ Employee Healthcare Organization
+            </div>
+            <div class="header-meta">
+                <div class="meta-item">
+                    <div class="meta-label">Prepared By</div>
+                    <div class="meta-value">Hans Kwadwo Kwakye</div>
+                    <div style="font-size: 0.875rem; color: #64748b; margin-top: 4px;">Senior GRC Manager</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Report Date</div>
+                    <div class="meta-value">February 2024</div>
+                    <div style="font-size: 0.875rem; color: #64748b; margin-top: 4px;">Document Version 1.0</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Coverage</div>
+                    <div class="meta-value">5,400+ Employees</div>
+                    <div style="font-size: 0.875rem; color: #64748b; margin-top: 4px;">All Departments</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Critical Systems</div>
+                    <div class="meta-value">47 Applications</div>
+                    <div style="font-size: 0.875rem; color: #64748b; margin-top: 4px;">Mission Critical</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card highlight-card">
+                <h3>Program ROI Achievement</h3>
+                <div class="highlight-value">162%</div>
+                <div class="highlight-description">
+                    Annual return on investment with $15.18M in total cost avoidance
+                </div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3><div class="card-icon">📊</div>Implementation Summary</h3>
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">$2.28M</span>
+                        <div class="stat-label">Actual Budget</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">-5%</span>
+                        <div class="stat-label">Under Budget</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">12</span>
+                        <div class="stat-label">Months Delivered</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">98%</span>
+                        <div class="stat-label">Phase Completion</div>
+                    </div>
+                </div>
+                <p style="margin-top: 16px; color: #64748b; font-size: 0.875rem; text-align: center;">
+                    Completed comprehensive BCP program 5% under budget ($2.28M vs $2.40M allocated) with all critical phases meeting or exceeding targets. Phase 4 completed 3 days ahead of schedule.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-icon">🎯</div>Key Performance Metrics</h3>
+                <div class="metric-row">
+                    <span class="metric-label">Average Recovery Time (RTO)</span>
+                    <span class="metric-value status-badge status-success">
+                        <span class="status-dot"></span>4 hours
+                    </span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Maximum Recovery Point (RPO)</span>
+                    <span class="metric-value status-badge status-success">
+                        <span class="status-dot"></span>1 hour
+                    </span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Staff Training Completion</span>
+                    <span class="metric-value status-badge status-success">
+                        <span class="status-dot"></span>95%
+                    </span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Testing Success Rate</span>
+                    <span class="metric-value status-badge status-success">
+                        <span class="status-dot"></span>92%
+                    </span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-icon">🛡️</div>System Availability (2024)</h3>
+                <div style="margin: 16px 0;">
+                    <div class="metric-row" style="border: none; padding: 8px 0;">
+                        <span class="metric-label">EHR System</span>
+                        <span class="metric-value">99.97%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 99.97%;"></div>
+                    </div>
+                </div>
+                <div style="margin: 16px 0;">
+                    <div class="metric-row" style="border: none; padding: 8px 0;">
+                        <span class="metric-label">Network Infrastructure</span>
+                        <span class="metric-value">99.95%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 99.95%;"></div>
+                    </div>
+                </div>
+                <div style="margin: 16px 0;">
+                    <div class="metric-row" style="border: none; padding: 8px 0;">
+                        <span class="metric-label">Financial Systems</span>
+                        <span class="metric-value">99.94%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 99.94%;"></div>
+                    </div>
+                </div>
+                <p style="margin-top: 16px; color: #64748b; font-size: 0.875rem; text-align: center;">
+                    Achieved 99.97% uptime for EHR systems, exceeding the 99.9% target. All critical systems maintained above-target performance with average recovery times well within objectives.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-icon">📚</div>Training & Readiness</h3>
+                <div class="metric-row">
+                    <span class="metric-label">Overall Training Completion</span>
+                    <span class="metric-value">95%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Crisis Team Certification</span>
+                    <span class="metric-value">100%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Department Champions</span>
+                    <span class="metric-value">98%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">New Hire Orientation</span>
+                    <span class="metric-value">93%</span>
+                </div>
+                <p style="margin-top: 16px; color: #64748b; font-size: 0.875rem; text-align: center;">
+                    95% staff training completion rate across 5,400+ employees, with 100% crisis team certification and 98% department champion training completion.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-icon">🧪</div>Testing Performance</h3>
+                <div class="chart-container">
+                    <canvas id="testingChart"></canvas>
+                </div>
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">64+</span>
+                        <div class="stat-label">Annual Exercises</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">92%</span>
+                        <div class="stat-label">Success Rate</div>
+                    </div>
+                </div>
+                <p style="margin-top: 16px; color: #64748b; font-size: 0.875rem; text-align: center;">
+                    Executed 64+ exercises annually with 92% success rate in full-scale simulations and 94% functional test success rate, ensuring readiness across all scenarios.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-icon">💰</div>Cost Avoidance Analysis</h3>
+                <div class="chart-container">
+                    <canvas id="costChart"></canvas>
+                </div>
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">$8.5M</span>
+                        <div class="stat-label">Data Breaches</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">$3.02M</span>
+                        <div class="stat-label">Business Interruption</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">$2.16M</span>
+                        <div class="stat-label">System Outages</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">$1.5M</span>
+                        <div class="stat-label">Regulatory Fines</div>
+                    </div>
+                </div>
+                <p style="margin-top: 16px; color: #64748b; font-size: 0.875rem; text-align: center;">
+                    Delivered 162% annual return on investment through cost avoidance of $15.18M, including $8.5M in prevented data breaches and $3.02M in business interruption savings.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-icon">🏢</div>Department Coverage</h3>
+                <div class="department-grid">
+                    <div class="department-item">IT Operations</div>
+                    <div class="department-item">DevOps</div>
+                    <div class="department-item">Legal</div>
+                    <div class="department-item">Human Resources</div>
+                    <div class="department-item">Clinical Operations</div>
+                    <div class="department-item">Finance</div>
+                    <div class="department-item">Facilities</div>
+                    <div class="department-item">Security</div>
+                </div>
+                <div style="text-align: center; margin-top: 16px;">
+                    <span class="status-badge status-success">
+                        <span class="status-dot"></span>100% Critical Functions Protected
+                    </span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><div class="card-icon">⚡</div>Recovery Time Performance</h3>
+                <div style="margin: 16px 0;">
+                    <div class="metric-row" style="border: none; padding: 8px 0;">
+                        <span class="metric-label">Database Systems</span>
+                        <span class="metric-value">2.3 hours</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 58%;"></div>
+                    </div>
+                </div>
+                <div style="margin: 16px 0;">
+                    <div class="metric-row" style="border: none; padding: 8px 0;">
+                        <span class="metric-label">Application Systems</span>
+                        <span class="metric-value">1.8 hours</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 90%;"></div>
+                    </div>
+                </div>
+                <div style="margin: 16px 0;">
+                    <div class="metric-row" style="border: none; padding: 8px 0;">
+                        <span class="metric-label">Network Systems</span>
+                        <span class="metric-value">0.7 hours</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 70%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <h3 style="margin-bottom: 8px;">Healthcare Organization Business Continuity Program</h3>
+            <p style="color: #64748b; margin-bottom: 16px;">
+                Comprehensive implementation ensuring patient care continuity and operational resilience
+            </p>
+            <p style="color: #94a3b8; font-size: 0.875rem;">
+                Document Classification: Internal Use | Next Review: February 2025 | Prepared by Hans Kwadwo Kwakye, Senior GRC Manager
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Testing Performance Chart
+        const testingCtx = document.getElementById('testingChart').getContext('2d');
+        new Chart(testingCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Tabletop Exercises', 'Functional Testing', 'Full-Scale Simulation'],
+                datasets: [{
+                    label: 'Success Rate (%)',
+                    data: [98, 94, 92],
+                    backgroundColor: '#3b82f6',
+                    borderColor: '#1d4ed8',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: {
+                            color: '#f1f5f9'
+                        },
+                        ticks: {
+                            color: '#64748b'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#64748b'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Cost Avoidance Chart
+        const costCtx = document.getElementById('costChart').getContext('2d');
+        new Chart(costCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Data Breaches', 'Business Interruption', 'System Outages', 'Regulatory Fines'],
+                datasets: [{
+                    data: [8.5, 3.02, 2.16, 1.5],
+                    backgroundColor: ['#3b82f6', '#1d4ed8', '#60a5fa', '#93c5fd'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            color: '#64748b',
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Initialize progress bar animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const progressBars = document.querySelectorAll('.progress-fill');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const width = entry.target.style.width;
+                        entry.target.style.width = '0%';
+                        setTimeout(() => {
+                            entry.target.style.width = width;
+                        }, 100);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            progressBars.forEach(bar => observer.observe(bar));
+        });
+    </script>
+</body>
+</html>

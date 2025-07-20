@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare BCP Executive Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        .header .meta-info {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #34495e;
+            font-weight: 500;
+        }
+
+        .meta-item .icon {
+            width: 20px;
+            height: 20px;
+            background: #3498db;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .kpi-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .kpi-label {
+            color: #7f8c8d;
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+
+        .departments-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            color: white;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .departments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .department-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .department-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--dept-color, linear-gradient(90deg, #3498db, #2ecc71));
+        }
+
+        .department-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .department-card.active {
+            transform: scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .dept-header {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            margin-bottom: 15px;
+        }
+
+        .dept-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .dept-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-left: auto;
+        }
+
+        .status-operational {
+            background: #d5f4e6;
+            color: #27ae60;
+        }
+
+        .dept-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .metric {
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .metric-label {
+            font-size: 0.8em;
+            color: #7f8c8d;
+            margin-top: 2px;
+        }
+
+        .dept-details {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ecf0f1;
+        }
+
+        .dept-details.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid var(--accent-color, #3498db);
+        }
+
+        .detail-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .detail-value {
+            color: #7f8c8d;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+
+        .chart-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chart-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #3498db;
+            transform: translateX(-50%);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+            padding: 0 30px;
+        }
+
+        .timeline-item:nth-child(odd) {
+            text-align: right;
+            padding-right: 50%;
+        }
+
+        .timeline-item:nth-child(even) {
+            text-align: left;
+            padding-left: 50%;
+        }
+
+        .timeline-content {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .timeline-content::before {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #3498db;
+            border-radius: 50%;
+            top: 50%;
+        }
+
+        .timeline-item:nth-child(odd) .timeline-content::before {
+            right: -36px;
+            transform: translateY(-50%);
+        }
+
+        .timeline-item:nth-child(even) .timeline-content::before {
+            left: -36px;
+            transform: translateY(-50%);
+        }
+
+        .timeline-phase {
+            font-weight: 700;
+            color: #3498db;
+            margin-bottom: 5px;
+        }
+
+        .timeline-desc {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .footer {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .meta-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .timeline::before {
+                left: 20px;
+            }
+            
+            .timeline-item {
+                padding-left: 50px;
+                padding-right: 20px;
+                text-align: left;
+            }
+            
+            .timeline-item:nth-child(odd) {
+                text-align: left;
+                padding-right: 20px;
+            }
+            
+            .timeline-item:nth-child(even) {
+                padding-left: 50px;
+            }
+            
+            .timeline-content::before {
+                left: -36px !important;
+            }
+        }
+
+        /* Department-specific color schemes */
+        .dept-it { --dept-color: linear-gradient(90deg, #3498db, #2980b9); --accent-color: #3498db; }
+        .dept-devops { --dept-color: linear-gradient(90deg, #e74c3c, #c0392b); --accent-color: #e74c3c; }
+        .dept-legal { --dept-color: linear-gradient(90deg, #9b59b6, #8e44ad); --accent-color: #9b59b6; }
+        .dept-hr { --dept-color: linear-gradient(90deg, #f39c12, #e67e22); --accent-color: #f39c12; }
+        .dept-clinical { --dept-color: linear-gradient(90deg, #2ecc71, #27ae60); --accent-color: #2ecc71; }
+        .dept-finance { --dept-color: linear-gradient(90deg, #34495e, #2c3e50); --accent-color: #34495e; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Healthcare BCP Executive Dashboard</h1>
+            <div class="subtitle">Complete Business Continuity Program Overview</div>
+            <div class="meta-info">
+                <div class="meta-item">
+                    <div class="icon">👨‍💼</div>
+                    <span>Prepared by: Hans Kwadwo Kwakye, Senior GRC Manager</span>
+                </div>
+                <div class="meta-item">
+                    <div class="icon">📅</div>
+                    <span>Report Date: February 2024</span>
+                </div>
+                <div class="meta-item">
+                    <div class="icon">👥</div>
+                    <span>Coverage: 5,400+ Employees</span>
+                </div>
+                <div class="meta-item">
+                    <div class="icon">🏢</div>
+                    <span>Healthcare Organization</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-value">100%</div>
+                <div class="kpi-label">Critical Functions Protected</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">4hrs</div>
+                <div class="kpi-label">Average RTO</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">1hr</div>
+                <div class="kpi-label">Maximum RPO</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">95%</div>
+                <div class="kpi-label">Staff Training Completion</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">92%</div>
+                <div class="kpi-label">Testing Success Rate</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">162%</div>
+                <div class="kpi-label">Annual ROI</div>
+            </div>
+        </div>
+
+        <div class="departments-section">
+            <h2 class="section-title">Department Coverage Overview</h2>
+            <div class="departments-grid">
+                <div class="department-card dept-it" onclick="toggleDepartment(this)">
+                    <div class="dept-header">
+                        <div class="dept-title">IT Department</div>
+                        <div class="dept-status status-operational">Operational</div>
+                    </div>
+                    <div class="dept-metrics">
+                        <div class="metric">
+                            <div class="metric-value">99.97%</div>
+                            <div class="metric-label">EHR Uptime</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">30s</div>
+                            <div class="metric-label">Failover RTO</div>
+                        </div>
+                    </div>
+                    <div class="dept-details">
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-title">Critical Systems</div>
+                                <div class="detail-value">Epic EHR serving 5,400 users<br>Redundant data centers<br>24/7 SOC monitoring</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-title">Recovery Strategy</div>
+                                <div class="detail-value">Real-time replication<br>Automatic failover<br>Multiple ISP backup</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-title">Data Protection</div>
+                                <div class="detail-value">Hourly incremental backups<br>Daily full backups<br>30-day retention</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-title">Staff Coverage</div>
+                                <div class="detail-value">24/7 on-call rotation<br>Vendor support contracts<br>Cross-training program</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="department-card dept-devops" onclick="toggleDepartment(this)">
+                    <div class="dept-header">
+                        <div class="dept-title">DevOps</div>
+                        <div class="dept-status status-operational">Operational</div>
+                    </div>
+                    <div class="dept-metrics">
+                        <div class="metric">
+                            <div class="metric-value">2hrs</div>
+                            <div class="metric-label">Production RTO</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">100%</div>
+                            <div class="metric-label">Pipeline Protection</div>
+                        </div>
+                    </div>
+                    <div class="dept-details">
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-title">CI/CD Protection</div>
+                                <div class="detail-value">Multiple deployment environments<br>Distributed version control<br>Kubernetes clusters</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-title">Automation Tools</div>
+                                <div class="detail-value">Terraform templates<br>Ansible playbooks<br>Infrastructure as Code</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-title">Monitoring Stack</div>
+                                <div class="detail-value">Prometheus & Grafana<br>ELK stack<br>Automated alerting</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-title">Recovery Priority</div>
+                                <div class="detail-value">Production: 2hrs<br>Staging: 8hrs<br>Development: 24hrs</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="department-card dept-legal" onclick="toggleDepartment(this)">
+                    <div class="dept-header">
+                        <div class="dept-title">Legal</div>
+                        <div class="dept-status status-operational">Operational</div>
+                    </div>
+                    <div class="dept-metrics">
+                        <div class="metric">
+                            <div class="metric-value">99.9%</div>
+                            <div class="metric-label">Contract Access</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">&lt;2hrs</div>
+                            <div class="metric-label">Regulatory Response</div>
+                        </div>
+                    </div>
+                    <div class="dept-details">
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-title">Critical Functions</div>
+                                <div class="detail-value">Contract management<br>Regulatory compliance<br>Litigation support</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-title">Document Systems</div>
+                                <div class="detail-value">Cloud-based repository<br>Automated backups<br>Remote access</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-title">Compliance Monitoring</div>
+                                <div class="detail-value">HIPAA compliance<br>Automated alerts<br>Real-time dashboard</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-title">External Support</div>
+                                <div class="detail-value">24/7 legal counsel<br>Healthcare law experts<br>Emergency contracts</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="department-card dept-hr" onclick="toggleDepartment(this)">
+                    <div class="dept-header">
+                        <div class="dept-title">Human Resources</div>
+                        <div class="dept-status status-operational">Operational</div>
+                    </div>
+                    <div class="dept-metrics">
+                        <div class="metric">
+                            <div class="metric-value">100%</div>
+                            <div class="metric-label">Remote Capability</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">5,400+</div>
+                            <div class="metric-label">Employees Covered</div>
+                        </div>
+                    </div>
+                    <div class="dept-details">
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-title">Payroll Continuity</div>
+                                <div class="detail-value">Redundant systems<br>Emergency procedures<br>Manual processing backup</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-title">Communication</div>
+                                <div class="detail-value">Mass notification system<br>99.7% delivery rate<br>Multilingual support</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-title">Workforce Planning</div>
+                                <div class="detail-value">Staffing scenarios mapped<br>Remote work ready<br>Emergency hiring</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-title">Essential Services</div>
+                                <div class="detail-value">Benefits processing<br>Employee assistance<br>Family communication</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="department-card dept-clinical" onclick="toggleDepartment(this)">
+                    <div class="dept-header">
+                        <div class="dept-title">Clinical Operations</div>
+                        <div class="dept-status status-operational">Operational</div>
+                    </div>
+                    <div class="dept-metrics">
+                        <div class="metric">
+                            <div class="metric-value">24/7</div>
+                            <div class="metric-label">Emergency Ops</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">30 Days</div>
+                            <div class="metric-label">Supply Inventory</div>
+                        </div>
+                    </div>
+                    <div class="dept-details">
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-title">Patient Care</div>
+                                <div class="detail-value">Emergency department<br>Inpatient services<br>Outpatient scheduling</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-title">Equipment</div>
+                                <div class="detail-value">Critical equipment backup<br>Mobile unit rentals<br>Vendor agreements</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-title">Pharmacy</div>
+                                <div class="detail-value">Medication dispensing<br>Emergency protocols<br>Supply chain backup</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-title">Surge Capacity</div>
+                                <div class="detail-value">Emergency surge planning<br>Bed management<br>Discharge protocols</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="department-card dept-finance" onclick="toggleDepartment(this)">
+                    <div class="dept-header">
+                        <div class="dept-title">Finance</div>
+                        <div class="dept-status status-operational">Operational</div>
+                    </div>
+                    <div class="dept-metrics">
+                        <div class="metric">
+                            <div class="metric-value">99.94%</div>
+                            <div class="metric-label">System Uptime</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">$15.18M</div>
+                            <div class="metric-label">Cost Avoidance</div>
+                        </div>
+                    </div>
+                    <div class="dept-details">
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-title">Revenue Cycle</div>
+                                <div class="detail-value">Patient billing<br>Claims processing<br>Revenue collection</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-title">Accounts Payable</div>
+                                <div class="detail-value">Vendor payments<br>Emergency processing<br>Cash flow management</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-title">Financial Reporting</div>
+                                <div class="detail-value">Regulatory reports<br>Management dashboards<br>Real-time analytics</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-title">Treasury</div>
+                                <div class="detail-value">Cash flow management<br>Investment oversight<br>Banking relationships</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-section">
+            <div class="chart-title">Implementation Timeline</div>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-phase">Phase 1: Foundation (Months 1-3)</div>
+                        <div class="timeline-desc">Executive sponsorship, team formation, risk assessment, policy framework, critical function identification</div>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-phase">Phase 2: Development (Months 4-8)</div>
+                        <div class="timeline-desc">IT/DevOps plans, Legal/HR plans, Clinical operations, cross-department coordination</div>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-phase">Phase 3: Testing (Months 9-11)</div>
+                        <div class="timeline-desc">Tabletop exercises, functional testing, full-scale simulations, plan refinement</div>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-phase">Phase 4: Launch (Month 12)</div>
+                        <div class="timeline-desc">Program launch, final training, go-live support, operational handover</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>Healthcare Organization BCP Program</strong> | Comprehensive Business Continuity Coverage</p>
+            <p>Document prepared by Hans Kwadwo Kwakye, Senior Cybersecurity GRC Manager | Classification: Internal Use</p>
+        </div>
+    </div>
+
+    <script>
+        function toggleDepartment(element) {
+            // Close all other departments
+            const allCards = document.querySelectorAll('.department-card');
+            const allDetails = document.querySelectorAll('.dept-details');
+            
+            allCards.forEach(card => {
+                if (card !== element) {
+                    card.classList.remove('active');
+                }
+            });
+            
+            allDetails.forEach(detail => {
+                if (detail.parentElement !== element) {
+                    detail.classList.remove('active');
+                }
+            });
+            
+            // Toggle current department
+            const details = element.querySelector('.dept-details');
+            const isActive = element.classList.contains('active');
+            
+            if (isActive) {
+                element.classList.remove('active');
+                details.classList.remove('active');
+            } else {
+                element.classList.add('active');
+                details.classList.add('active');
+            }
+        }
+
+        // Add smooth scrolling and interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate KPI cards on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all cards
+            document.querySelectorAll('.kpi-card, .department-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'all 0.6s ease';
+                observer.observe(card);
+            });
+
+            // Add click analytics
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.department-card')) {
+                    const deptName = e.target.closest('.department-card').querySelector('.dept-title').textContent;
+                    console.log(`Department clicked: ${deptName}`);
+                }
+            });
