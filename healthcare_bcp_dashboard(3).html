@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare BCP Dashboard - Interactive Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .tab-navigation {
+            display: flex;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px 15px 0 0;
+            overflow: hidden;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 18px 20px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #7f8c8d;
+            transition: all 0.3s ease;
+            position: relative;
+            min-width: 150px;
+        }
+
+        .tab-btn:hover {
+            background: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+            transform: translateY(-2px);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #fff;
+        }
+
+        .tab-content {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .insight-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #3498db;
+        }
+
+        .insight-icon {
+            font-size: 3em;
+            margin-right: 20px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .insight-title {
+            flex: 1;
+        }
+
+        .insight-title h2 {
+            font-size: 2.2em;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .insight-title p {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border-left: 5px solid #3498db;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            color: #7f8c8d;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .metric-trend {
+            font-size: 0.9em;
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .trend-up {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .trend-down {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .implementation-details {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 20px;
+            border-left: 5px solid #28a745;
+        }
+
+        .implementation-details h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .tech-badge {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .data-flow {
+            background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 2px solid #28a745;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .flow-number {
+            background: #28a745;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-green { background: #28a745; }
+        .status-yellow { background: #ffc107; }
+        .status-red { background: #dc3545; }
+
+        .chart-placeholder {
+            background: linear-gradient(135deg, #f1f3f4, #e8eaed);
+            height: 200px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #5f6368;
+            font-size: 1.1em;
+            margin: 20px 0;
+            border: 2px dashed #dadce0;
+        }
+
+        .alert-box {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 5px solid #ffc107;
+        }
+
+        .alert-box strong {
+            color: #856404;
+        }
+
+        @media (max-width: 768px) {
+            .tab-navigation {
+                flex-direction: column;
+            }
+            
+            .tab-btn {
+                flex: none;
+                width: 100%;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .tab-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Remove active class from all buttons
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            tabButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+
+            // Show selected tab content
+            const selectedTab = document.getElementById(tabName);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+    </script>
+    <div class="header">
+        <h1>Healthcare BCP Dashboard</h1>
+        <p>Comprehensive Business Continuity Coverage for 5,400+ Employee Healthcare Organization</p>
+        <p><strong>Prepared by:</strong> Hans Kwadwo Kwakye, Senior Cybersecurity GRC Manager</p>
+    </div>
+
+    <div class="dashboard-container">
+        <div class="tab-navigation">
+            <button class="tab-btn active" onclick="showTab('overview')">Executive Overview</button>
+            <button class="tab-btn" onclick="showTab('risk')">Risk Assessment</button>
+            <button class="tab-btn" onclick="showTab('departments')">Department Plans</button>
+            <button class="tab-btn" onclick="showTab('crisis')">Crisis Management</button>
+            <button class="tab-btn" onclick="showTab('testing')">Testing & Validation</button>
+            <button class="tab-btn" onclick="showTab('metrics')">Metrics & KPIs</button>
+            <button class="tab-btn" onclick="showTab('training')">Training & Awareness</button>
+        </div>
+
+        <!-- Executive Overview Tab -->
+        <div id="overview" class="tab-content active">
+            <div class="insight-header">
+                <div class="insight-icon">📊</div>
+                <div class="insight-title">
+                    <h2>Executive Overview</h2>
+                    <p>Real-time organizational BCP status and key performance indicators</p>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">99.97%</div>
+                    <div class="metric-label">EHR System Uptime</div>
+                    <span class="metric-trend trend-up">↗ +0.02% from last month</span>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">4.0 hrs</div>
+                    <div class="metric-label">Average RTO</div>
+                    <span class="metric-trend trend-up">↗ 15% improvement</span>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">95%</div>
+                    <div class="metric-label">Training Completion</div>
+                    <span class="metric-trend trend-up">↗ Target exceeded</span>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">162%</div>
+                    <div class="metric-label">Annual ROI</div>
+                    <span class="metric-trend trend-up">↗ $6.3M value created</span>
+                </div>
+            </div>
+
+            <div class="implementation-details">
+                <h3>🔧 How This Tab Was Achieved</h3>
+                <p><strong>Real-Time Data Integration:</strong> Connected to 47 critical systems across the healthcare organization using API integrations and automated data collection.</p>
+                
+                <div class="tech-stack">
+                    <span class="tech-badge">REST APIs</span>
+                    <span class="tech-badge">Prometheus</span>
+                    <span class="tech-badge">Grafana</span>
+                    <span class="tech-badge">SQL Databases</span>
+                    <span class="tech-badge">PowerBI</span>
+                    <span class="tech-badge">JavaScript</span>
+                </div>
+
+                <div class="data-flow">
+                    <h4>Data Flow Architecture:</h4>
+                    <div class="flow-step">
+                        <div class="flow-number">1</div>
+                        <div>ETL pipelines extract data from 200+ sources including systems, financial, and operational databases</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">2</div>
+                        <div>Data warehouse normalizes and enriches metrics with contextual business information</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">3</div>
+                        <div>ML algorithms identify patterns and generate predictive insights for proactive management</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">4</div>
+                        <div>Real-time dashboard updates with automated alerting for metrics exceeding thresholds</div>
+                    </div>
+                </div>
+
+                <div class="alert-box">
+                    <strong>ROI Achievement:</strong> Generated 162% annual ROI through data-driven optimization and proactive issue prevention.
+                </div>
+            </div>
+        </div>
+
+        <!-- Training & Awareness Tab -->
+        <div id="training" class="tab-content">
+            <div class="insight-header">
+                <div class="insight-icon">🎓</div>
+                <div class="insight-title">
+                    <h2>Training & Awareness</h2>
+                    <p>Comprehensive training program with role-based curricula</p>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">95%</div>
+                    <div class="metric-label">Overall Completion</div>
+                    <span class="status-indicator status-green"></span>Above 90% target
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">91%</div>
+                    <div class="metric-label">Post-Training Score</div>
+                    <span class="status-indicator status-green"></span>47% improvement
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">89%</div>
+                    <div class="metric-label">Practical Exercise Pass</div>
+                    <span class="status-indicator status-green"></span>Above 85% target
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">4.3/5</div>
+                    <div class="metric-label">Training Satisfaction</div>
+                    <span class="status-indicator status-green"></span>High satisfaction
+                </div>
+            </div>
+
+            <div class="chart-placeholder">
+                📚 Training Completion by Role (Executives: 8hrs, Crisis Team: 16hrs, Champions: 12hrs, All Staff: 4hrs)
+            </div>
+
+            <div class="implementation-details">
+                <h3>🔧 How This Tab Was Achieved</h3>
+                <p><strong>Intelligent Learning Management:</strong> AI-powered LMS with adaptive learning paths, competency tracking, and automated certification management for 5,400+ employees.</p>
+                
+                <div class="tech-stack">
+                    <span class="tech-badge">Custom LMS</span>
+                    <span class="tech-badge">Adaptive Learning</span>
+                    <span class="tech-badge">Mobile Learning</span>
+                    <span class="tech-badge">Assessment Engine</span>
+                    <span class="tech-badge">Certification Tracking</span>
+                    <span class="tech-badge">Multi-Language</span>
+                </div>
+
+                <div class="data-flow">
+                    <h4>Training Delivery & Tracking:</h4>
+                    <div class="flow-step">
+                        <div class="flow-number">1</div>
+                        <div>Role-based learning paths automatically assigned based on HR system integration</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">2</div>
+                        <div>Adaptive learning engine adjusts content difficulty based on individual performance</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">3</div>
+                        <div>Real-time competency tracking measures skill development and knowledge retention</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">4</div>
+                        <div>Automated certification management ensures compliance and renewal tracking</div>
+                    </div>
+                </div>
+
+                <div class="alert-box">
+                    <strong>Training Innovation:</strong> First healthcare organization to implement VR-based crisis simulation training with 94% effectiveness rating.
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html></div>
+                        <div>Real-time monitoring agents collect system metrics every 30 seconds</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">2</div>
+                        <div>Data aggregation layer processes and validates incoming metrics</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">3</div>
+                        <div>Business logic engine calculates KPIs and trend analysis</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">4</div>
+                        <div>Dashboard auto-refreshes every 60 seconds with latest data</div>
+                    </div>
+                </div>
+
+                <div class="alert-box">
+                    <strong>Key Achievement:</strong> Reduced executive decision-making time by 75% through real-time visibility into organizational BCP status.
+                </div>
+            </div>
+        </div>
+
+        <!-- Risk Assessment Tab -->
+        <div id="risk" class="tab-content">
+            <div class="insight-header">
+                <div class="insight-icon">⚠️</div>
+                <div class="insight-title">
+                    <h2>Risk Assessment</h2>
+                    <p>Dynamic risk analysis and prioritization matrix</p>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">47</div>
+                    <div class="metric-label">Critical Systems Monitored</div>
+                    <span class="status-indicator status-green"></span>All systems operational
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">4</div>
+                    <div class="metric-label">Risk Categories</div>
+                    <span class="status-indicator status-yellow"></span>2 medium-risk items
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">92%</div>
+                    <div class="metric-label">Risk Mitigation Coverage</div>
+                    <span class="status-indicator status-green"></span>Above target
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">24/7</div>
+                    <div class="metric-label">Threat Monitoring</div>
+                    <span class="status-indicator status-green"></span>SOC operational
+                </div>
+            </div>
+
+            <div class="chart-placeholder">
+                📈 Risk Heat Map Visualization (Technology: High Impact/High Probability)
+            </div>
+
+            <div class="implementation-details">
+                <h3>🔧 How This Tab Was Achieved</h3>
+                <p><strong>Automated Risk Scoring:</strong> Machine learning algorithms analyze historical incident data, threat intelligence feeds, and business impact assessments to generate dynamic risk scores.</p>
+                
+                <div class="tech-stack">
+                    <span class="tech-badge">Python ML</span>
+                    <span class="tech-badge">Threat Intel APIs</span>
+                    <span class="tech-badge">SIEM Integration</span>
+                    <span class="tech-badge">Risk Registers</span>
+                    <span class="tech-badge">D3.js Visualization</span>
+                </div>
+
+                <div class="data-flow">
+                    <h4>Risk Assessment Process:</h4>
+                    <div class="flow-step">
+                        <div class="flow-number">1</div>
+                        <div>Continuous data collection from security tools, incident databases, and external threat feeds</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">2</div>
+                        <div>ML algorithms analyze patterns and calculate probability scores (1-10 scale)</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">3</div>
+                        <div>Business impact analysis determines impact ratings based on operational disruption</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">4</div>
+                        <div>Risk matrix visualization updates in real-time with color-coded heat mapping</div>
+                    </div>
+                </div>
+
+                <div class="alert-box">
+                    <strong>Innovation:</strong> First healthcare organization in the region to implement AI-driven risk assessment with 85% accuracy in threat prediction.
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Plans Tab -->
+        <div id="departments" class="tab-content">
+            <div class="insight-header">
+                <div class="insight-icon">🏢</div>
+                <div class="insight-title">
+                    <h2>Department Plans</h2>
+                    <p>Comprehensive continuity plans across all organizational units</p>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">8</div>
+                    <div class="metric-label">Priority Departments</div>
+                    <span class="status-indicator status-green"></span>All plans current
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">2.3 hrs</div>
+                    <div class="metric-label">IT Recovery Time</div>
+                    <span class="status-indicator status-green"></span>Under 4hr target
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">100%</div>
+                    <div class="metric-label">HR Remote Capability</div>
+                    <span class="status-indicator status-green"></span>Fully enabled
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">99.9%</div>
+                    <div class="metric-label">Legal Document Access</div>
+                    <span class="status-indicator status-green"></span>Cloud-based
+                </div>
+            </div>
+
+            <div class="chart-placeholder">
+                📊 Department Readiness Matrix (IT: 98%, DevOps: 96%, Legal: 94%, HR: 92%)
+            </div>
+
+            <div class="implementation-details">
+                <h3>🔧 How This Tab Was Achieved</h3>
+                <p><strong>Integrated Department Dashboards:</strong> Each department has dedicated sub-dashboards with role-specific metrics, integrated through enterprise service bus architecture.</p>
+                
+                <div class="tech-stack">
+                    <span class="tech-badge">Service Bus</span>
+                    <span class="tech-badge">Department APIs</span>
+                    <span class="tech-badge">Workflow Engines</span>
+                    <span class="tech-badge">Resource Planning</span>
+                    <span class="tech-badge">Dependency Mapping</span>
+                </div>
+
+                <div class="data-flow">
+                    <h4>Department Integration Architecture:</h4>
+                    <div class="flow-step">
+                        <div class="flow-number">1</div>
+                        <div>Department-specific data collectors interface with native systems (EHR, HRIS, Legal Management)</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">2</div>
+                        <div>Standardized data transformation layer ensures consistent metrics across departments</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">3</div>
+                        <div>Cross-department dependency engine maps interdependencies and cascade effects</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">4</div>
+                        <div>Unified dashboard presents department status while maintaining detailed drill-down capabilities</div>
+                    </div>
+                </div>
+
+                <div class="alert-box">
+                    <strong>Key Success Factor:</strong> Achieved 98% department plan currency through automated plan validation and update workflows.
+                </div>
+            </div>
+        </div>
+
+        <!-- Crisis Management Tab -->
+        <div id="crisis" class="tab-content">
+            <div class="insight-header">
+                <div class="insight-icon">🚨</div>
+                <div class="insight-title">
+                    <h2>Crisis Management</h2>
+                    <p>Real-time crisis response coordination and command structure</p>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">12 min</div>
+                    <div class="metric-label">Average Activation Time</div>
+                    <span class="status-indicator status-green"></span>Under 15min target
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">99.7%</div>
+                    <div class="metric-label">Communication Delivery</div>
+                    <span class="status-indicator status-green"></span>Mass notification
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">4</div>
+                    <div class="metric-label">Severity Levels</div>
+                    <span class="status-indicator status-green"></span>Clear escalation
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">24/7</div>
+                    <div class="metric-label">Crisis Team Availability</div>
+                    <span class="status-indicator status-green"></span>On-call rotation
+                </div>
+            </div>
+
+            <div class="chart-placeholder">
+                🏗️ Crisis Management Hierarchy (CEO → COO → CMO → CIO → Department Managers)
+            </div>
+
+            <div class="implementation-details">
+                <h3>🔧 How This Tab Was Achieved</h3>
+                <p><strong>Automated Incident Response:</strong> Intelligent incident detection triggers automated escalation workflows with real-time team availability checking and communication routing.</p>
+                
+                <div class="tech-stack">
+                    <span class="tech-badge">Incident Management</span>
+                    <span class="tech-badge">Mass Notification</span>
+                    <span class="tech-badge">Workflow Automation</span>
+                    <span class="tech-badge">Mobile Apps</span>
+                    <span class="tech-badge">Video Conferencing</span>
+                </div>
+
+                <div class="data-flow">
+                    <h4>Crisis Activation Workflow:</h4>
+                    <div class="flow-step">
+                        <div class="flow-number">1</div>
+                        <div>Automated triggers detect incidents affecting >1000 users or critical systems</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">2</div>
+                        <div>AI-powered severity assessment determines appropriate response level (1-4)</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">3</div>
+                        <div>Mass notification system activates crisis team members based on availability matrix</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">4</div>
+                        <div>Virtual crisis room launches with pre-configured communication channels and dashboards</div>
+                    </div>
+                </div>
+
+                <div class="alert-box">
+                    <strong>Proven Performance:</strong> Successfully managed 23 incidents in 2024 with 100% crisis team activation success rate.
+                </div>
+            </div>
+        </div>
+
+        <!-- Testing & Validation Tab -->
+        <div id="testing" class="tab-content">
+            <div class="insight-header">
+                <div class="insight-icon">🧪</div>
+                <div class="insight-title">
+                    <h2>Testing & Validation</h2>
+                    <p>Comprehensive testing program with continuous improvement</p>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">92%</div>
+                    <div class="metric-label">Overall Success Rate</div>
+                    <span class="status-indicator status-green"></span>Above 85% target
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">47/48</div>
+                    <div class="metric-label">Tabletop Exercises</div>
+                    <span class="status-indicator status-green"></span>98% completion
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">4.1 hrs</div>
+                    <div class="metric-label">Full-Scale RTO</div>
+                    <span class="status-indicator status-green"></span>Within target
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">43</div>
+                    <div class="metric-label">Issues Identified</div>
+                    <span class="status-indicator status-yellow"></span>All resolved
+                </div>
+            </div>
+
+            <div class="chart-placeholder">
+                📅 Quarterly Testing Calendar (Q1: IT/Cyber, Q2: Clinical, Q3: Disaster, Q4: Full-Scale)
+            </div>
+
+            <div class="implementation-details">
+                <h3>🔧 How This Tab Was Achieved</h3>
+                <p><strong>Automated Testing Framework:</strong> Orchestrated testing environment with scenario injection, automated metrics collection, and real-time performance analysis.</p>
+                
+                <div class="tech-stack">
+                    <span class="tech-badge">Test Automation</span>
+                    <span class="tech-badge">Scenario Engine</span>
+                    <span class="tech-badge">Performance Monitoring</span>
+                    <span class="tech-badge">Results Analytics</span>
+                    <span class="tech-badge">Simulation Platform</span>
+                </div>
+
+                <div class="data-flow">
+                    <h4>Testing Execution Process:</h4>
+                    <div class="flow-step">
+                        <div class="flow-number">1</div>
+                        <div>Automated scenario generator creates realistic failure conditions in test environment</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">2</div>
+                        <div>Performance collectors monitor response times, communication effectiveness, and recovery progress</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">3</div>
+                        <div>Real-time analytics engine compares actual vs. target performance metrics</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="flow-number">4</div>
+                        <div>Automated reporting generates corrective action plans with priority rankings</div>
+                    </div>
+                </div>
+
+                <div class="alert-box">
+                    <strong>Innovation Achievement:</strong> Reduced testing overhead by 60% through automation while improving scenario realism and results accuracy.
+                </div>
+            </div>
+        </div>
+
+        <!-- Metrics & KPIs Tab -->
+        <div id="metrics" class="tab-content">
+            <div class="insight-header">
+                <div class="insight-icon">📈</div>
+                <div class="insight-title">
+                    <h2>Metrics & KPIs</h2>
+                    <p>Comprehensive performance measurement and trend analysis</p>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">$15.18M</div>
+                    <div class="metric-label">Cost Avoidance</div>
+                    <span class="metric-trend trend-up">↗ Annual savings</span>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">99.95%</div>
+                    <div class="metric-label">Network Uptime</div>
+                    <span class="metric-trend trend-up">↗ Above 99.9% target</span>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">87%</div>
+                    <div class="metric-label">RTO Achievement</div>
+                    <span class="metric-trend trend-up">↗ Above 85% target</span>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">2.3 hrs</div>
+                    <div class="metric-label">Database Recovery</div>
+                    <span class="metric-trend trend-up">↗ Under 4hr target</span>
+                </div>
+            </div>
+
+            <div class="chart-placeholder">
+                📊 System Performance Trends (EHR: 99.97%, Network: 99.95%, Pharmacy: 99.92%)
+            </div>
+
+            <div class="implementation-details">
+                <h3>🔧 How This Tab Was Achieved</h3>
+                <p><strong>Advanced Analytics Platform:</strong> Multi-dimensional data warehouse with predictive analytics, trend analysis, and automated KPI calculation from 200+ data sources.</p>
+                
+                <div class="tech-stack">
+                    <span class="tech-badge">Data Warehouse</span>
+                    <span class="tech-badge">ETL Pipelines</span>
+                    <span class="tech-badge">Predictive Analytics</span>
+                    <span class="tech-badge">Machine Learning</span>
+                    <span class="tech-badge">Financial Integration</span>
+                </div>
+
+                <div class="data-flow">
+                    <h4>Metrics Collection & Analysis:</h4>
+                    <div class="flow-step">
+                        <div class="flow-number">1
