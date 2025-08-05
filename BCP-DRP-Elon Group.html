@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Continuity & Disaster Recovery Project Plan - Elon Medical Group</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+            50% { transform: translate(-50%, -50%) rotate(180deg); }
+        }
+
+        .header h1 {
+            font-size: 2.8em;
+            margin-bottom: 15px;
+            font-weight: 700;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.95;
+            font-weight: 300;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            margin-top: 30px;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: 800;
+            color: #00d4ff;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 1em;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        .navigation {
+            background: #f8fafc;
+            padding: 0;
+            display: flex;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .navigation::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-item {
+            flex: 1;
+            min-width: 180px;
+            padding: 20px 25px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transform: scaleX(0);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-item:hover {
+            color: #1e293b;
+            background: rgba(102, 126, 234, 0.08);
+        }
+
+        .nav-item.active {
+            color: #1e293b;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            font-weight: 700;
+        }
+
+        .nav-item.active::after {
+            transform: scaleX(1);
+        }
+
+        .content {
+            padding: 40px;
+            min-height: 600px;
+        }
+
+        .tab-content {
+            display: none;
+            animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-size: 2.2em;
+            color: #1e293b;
+            margin-bottom: 35px;
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h3 {
+            color: #1e293b;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card p, .card li {
+            color: #475569;
+            line-height: 1.7;
+            margin-bottom: 12px;
+        }
+
+        .card ul {
+            padding-left: 20px;
+        }
+
+        .card li {
+            margin-bottom: 8px;
+        }
+
+        .process-diagram {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .process-flow {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .process-step {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 20px;
+            border-radius: 16px;
+            text-align: center;
+            position: relative;
+            transition: transform 0.3s ease;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .process-step:hover {
+            transform: translateY(-5px);
+        }
+
+        .process-step h4 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .process-step p {
+            font-size: 1em;
+            margin-bottom: 8px;
+            opacity: 0.95;
+        }
+
+        .process-step small {
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+
+        .risk-item {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 5px solid;
+            transition: transform 0.2s ease;
+        }
+
+        .risk-item:hover {
+            transform: translateX(5px);
+        }
+
+        .risk-high { border-left-color: #ef4444; }
+        .risk-medium { border-left-color: #f59e0b; }
+        .risk-low { border-left-color: #10b981; }
+
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+            margin-top: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            position: relative;
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -32px;
+            top: 35px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: 4px solid white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+        }
+
+        .timeline-item h3 {
+            color: #1e293b;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            font-weight: 700;
+        }
+
+        .framework-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .framework-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+        }
+
+        .framework-item:hover {
+            transform: translateY(-8px) scale(1.02);
+        }
+
+        .framework-item h3 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .framework-item p {
+            font-size: 1em;
+            margin-bottom: 10px;
+            opacity: 0.95;
+        }
+
+        .framework-item small {
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+
+        .budget-chart {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            margin: 25px 0;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .budget-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .budget-item:last-child {
+            border-bottom: none;
+        }
+
+        .budget-bar {
+            width: 50%;
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 20px;
+        }
+
+        .budget-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 10px;
+            transition: width 1s ease;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+        }
+
+        .kpi-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .kpi-number {
+            font-size: 2.8em;
+            font-weight: 800;
+            margin-bottom: 12px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .kpi-label {
+            font-size: 1em;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .stats-bar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .navigation {
+                flex-direction: column;
+            }
+            
+            .nav-item {
+                min-width: auto;
+                text-align: center;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .process-flow {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Business Continuity & Disaster Recovery</h1>
+            <p>Elon Medical Group - Enterprise Resilience Framework</p>
+            <div style="margin-top: 25px; padding: 20px; background: rgba(255, 255, 255, 0.1); border-radius: 12px; backdrop-filter: blur(10px);">
+                <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 30px; font-size: 1.1em;">
+                    <div style="text-align: center;">
+                        <div style="font-weight: 700; color: #00d4ff; margin-bottom: 5px;">Project Lead</div>
+                        <div style="font-weight: 600;">Hans Kwadwo Kwakye</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-weight: 700; color: #00d4ff; margin-bottom: 5px;">Title</div>
+                        <div style="font-weight: 600;">Senior Enterprise Risk and Governance Consultant</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-weight: 700; color: #00d4ff; margin-bottom: 5px;">Experience</div>
+                        <div style="font-weight: 600;">9 Years</div>
+                    </div>
+                </div>
+            </div>
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-number">4,000</span>
+                    <div class="stat-label">Employees</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">2M</span>
+                    <div class="stat-label">Members</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">47</span>
+                    <div class="stat-label">Departments</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">$5M</span>
+                    <div class="stat-label">Initial Investment</div>
+                </div>
+            </div>
+        </div>
+
+        <nav class="navigation">
+            <button class="nav-item active" data-tab="overview">📊 Overview</button>
+            <button class="nav-item" data-tab="risk-analysis">⚠️ Risk Analysis</button>
+            <button class="nav-item" data-tab="frameworks">📋 Frameworks</button>
+            <button class="nav-item" data-tab="timeline">⏰ Timeline</button>
+            <button class="nav-item" data-tab="architecture">🏗️ Architecture</button>
+            <button class="nav-item" data-tab="budget">💰 Budget</button>
+            <button class="nav-item" data-tab="metrics">📈 KPIs</button>
+        </nav>
+
+        <div class="content">
+            <!-- Overview Tab -->
+            <div id="overview" class="tab-content active">
+                <h2 class="section-title">Project Overview</h2>
+                
+                <div class="process-diagram">
+                    <h3 style="margin-bottom: 20px; color: #1e293b; text-align: center;">🔄 BCDR Implementation Process</h3>
+                    <div class="process-flow">
+                        <div class="process-step">
+                            <h4>Phase 1</h4>
+                            <p>Assessment & Planning</p>
+                            <small>Months 1-3</small>
+                        </div>
+                        <div class="process-step">
+                            <h4>Phase 2</h4>
+                            <p>Development</p>
+                            <small>Months 4-8</small>
+                        </div>
+                        <div class="process-step">
+                            <h4>Phase 3</h4>
+                            <p>Implementation</p>
+                            <small>Months 9-11</small>
+                        </div>
+                        <div class="process-step">
+                            <h4>Phase 4</h4>
+                            <p>Testing & Refinement</p>
+                            <small>Month 12</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <div class="card">
+                        <h3>🎯 Key Objectives</h3>
+                        <ul>
+                            <li>Ensure continuity of critical healthcare services during disruptions</li>
+                            <li>Minimize financial impact and protect organizational assets</li>
+                            <li>Maintain regulatory compliance and patient safety standards</li>
+                            <li>Protect organizational reputation and stakeholder confidence</li>
+                            <li>Enable rapid recovery to normal operations</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>🏗️ Project Scope</h3>
+                        <ul>
+                            <li>Enterprise-wide BCP/DRP covering all departments</li>
+                            <li>Integration of 47 departmental BCPs into unified framework</li>
+                            <li>Technology disaster recovery capabilities implementation</li>
+                            <li>Crisis management and communication protocols</li>
+                            <li>Comprehensive testing and maintenance programs</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>👥 Governance Structure</h3>
+                        <p><strong>Executive Steering Committee:</strong></p>
+                        <ul>
+                            <li>CEO, COO, CFO, CIO</li>
+                            <li>Chief Medical Officer</li>
+                            <li>Chief Risk Officer</li>
+                        </ul>
+                        <p><strong>Program Management Office:</strong></p>
+                        <ul>
+                            <li>Senior GRC & BCP/DRP Director (Lead)</li>
+                            <li>Business Continuity Manager</li>
+                            <li>IT Disaster Recovery Manager</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>🔧 Recovery Time Objectives</h3>
+                        <p><strong>Tier 1:</strong> Mission Critical (0-4 hours RTO)</p>
+                        <p><strong>Tier 2:</strong> Business Critical (4-24 hours RTO)</p>
+                        <p><strong>Tier 3:</strong> Business Important (24-72 hours RTO)</p>
+                        <p><strong>Tier 4:</strong> Business Support (72+ hours RTO)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk Analysis Tab -->
+            <div id="risk-analysis" class="tab-content">
+                <h2 class="section-title">Risk Analysis & Business Impact</h2>
+                
+                <div class="grid">
+                    <div class="card">
+                        <h3>🌪️ Natural Disasters</h3>
+                        <div class="risk-item risk-medium">
+                            <strong>Hurricanes/Floods</strong><br>
+                            SLE: $127,500 | ALE: $382,500 | ARO: 0.3
+                        </div>
+                        <div class="risk-item risk-low">
+                            <strong>Earthquakes</strong><br>
+                            SLE: $300,000 | ALE: $30,000 | ARO: 0.1
+                        </div>
+                        <div class="risk-item risk-medium">
+                            <strong>Severe Weather Events</strong><br>
+                            SLE: $90,000 | ALE: $45,000 | ARO: 0.5
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>💻 Technology Failures</h3>
+                        <div class="risk-item risk-high">
+                            <strong>Cyber Attacks</strong><br>
+                            SLE: $1,330,000 | ALE: $532,000 | ARO: 0.4
+                        </div>
+                        <div class="risk-item risk-medium">
+                            <strong>Data Center Outage</strong><br>
+                            SLE: $1,000,000 | ALE: $200,000 | ARO: 0.2
+                        </div>
+                        <div class="risk-item risk-medium">
+                            <strong>Network Infrastructure Failure</strong><br>
+                            SLE: $480,000 | ALE: $144,000 | ARO: 0.3
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>🏥 Operational Disruptions</h3>
+                        <div class="risk-item risk-high">
+                            <strong>Pandemic/Health Crisis</strong><br>
+                            SLE: $1,890,000 | ALE: $283,500 | ARO: 0.15
+                        </div>
+                        <div class="risk-item risk-high">
+                            <strong>Supply Chain Disruption</strong><br>
+                            SLE: $245,000 | ALE: $147,000 | ARO: 0.6
+                        </div>
+                        <div class="risk-item risk-medium">
+                            <strong>Key Vendor Failure</strong><br>
+                            SLE: $405,000 | ALE: $162,000 | ARO: 0.4
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>⏱️ Critical Business Functions - RTO</h3>
+                        <ul>
+                            <li><strong>Patient Care Systems:</strong> 2 hours</li>
+                            <li><strong>Electronic Health Records (EHR):</strong> 4 hours</li>
+                            <li><strong>Member Services Call Center:</strong> 4 hours</li>
+                            <li><strong>Telemedicine Platform:</strong> 4 hours</li>
+                            <li><strong>Pharmacy Benefits System:</strong> 6 hours</li>
+                            <li><strong>Claims Processing:</strong> 8 hours</li>
+                            <li><strong>Financial Systems:</strong> 24 hours</li>
+                            <li><strong>Provider Network Management:</strong> 24 hours</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Frameworks Tab -->
+            <div id="frameworks" class="tab-content">
+                <h2 class="section-title">Framework Mappings & Standards</h2>
+                
+                <div class="framework-grid">
+                    <div class="framework-item">
+                        <h3>ISO 22301:2019</h3>
+                        <p>Business Continuity Management Systems</p>
+                        <small>International standard for organizational resilience and continuity planning</small>
+                    </div>
+                    <div class="framework-item">
+                        <h3>NIST SP 800-34</h3>
+                        <p>IT Contingency Planning</p>
+                        <small>Technical disaster recovery guidance and best practices</small>
+                    </div>
+                    <div class="framework-item">
+                        <h3>ASIS SPC.1-2009</h3>
+                        <p>Organizational Resilience</p>
+                        <small>Security management and resilience framework</small>
+                    </div>
+                    <div class="framework-item">
+                        <h3>DRII Professional Practices</h3>
+                        <p>Business Continuity Best Practices</p>
+                        <small>Industry standard methodologies and practices</small>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <div class="card">
+                        <h3>🏥 Healthcare Regulations</h3>
+                        <ul>
+                            <li><strong>HIPAA Security Rule:</strong> Continuity requirements for protected health information</li>
+                            <li><strong>CMS Emergency Preparedness Rule:</strong> Medicare/Medicaid provider requirements</li>
+                            <li><strong>State Insurance Regulations:</strong> Business continuity for health plans</li>
+                            <li><strong>Joint Commission Standards:</strong> Hospital emergency management</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>🔄 Framework Integration</h3>
+                        <p><strong>Risk Assessment:</strong> NIST + ISO 22301 methodologies</p>
+                        <p><strong>Business Impact Analysis:</strong> DRII Professional Practices</p>
+                        <p><strong>Recovery Strategies:</strong> ASIS SPC.1 + NIST guidance</p>
+                        <p><strong>Testing & Exercises:</strong> ISO 22301 + DRII standards</p>
+                        <p><strong>Compliance Validation:</strong> Healthcare regulations + industry standards</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>📋 Compliance Validation</h3>
+                        <ul>
+                            <li><strong>Internal Audits:</strong> Semi-annual BCP/DRP audits</li>
+                            <li><strong>Annual Assessments:</strong> Compliance validation reviews</li>
+                            <li><strong>External Validation:</strong> Third-party assessments</li>
+                            <li><strong>Regulatory Examinations:</strong> State and federal reviews</li>
+                            <li><strong>ISO Certification:</strong> Maintenance and renewal</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>🎯 Framework Benefits</h3>
+                        <ul>
+                            <li>Comprehensive risk coverage across all threat vectors</li>
+                            <li>Regulatory compliance assurance and validation</li>
+                            <li>Industry best practice adoption and implementation</li>
+                            <li>Standardized methodologies and procedures</li>
+                            <li>Continuous improvement and enhancement cycle</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline Tab -->
+            <div id="timeline" class="tab-content">
+                <h2 class="section-title">Implementation Timeline</h2>
+                
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <h3>Phase 1: Assessment & Planning (Months 1-3)</h3>
+                        <p><strong>Month 1:</strong> Establish governance structure, conduct enterprise risk assessment, initiate stakeholder engagement</p>
+                        <p><strong>Month 2:</strong> Complete business impact analysis, identify critical dependencies, develop recovery strategies</p>
+                        <p><strong>Month 3:</strong> Finalize project plan, secure budget approval, launch communication campaign</p>
+                    </div>
+
+                    <div class="timeline-item">
+                        <h3>Phase 2: BCP/DRP Development (Months 4-8)</h3>
+                        <p><strong>Months 4-5:</strong> Develop enterprise BCP framework, create department plan templates, design IT disaster recovery architecture</p>
+                        <p><strong>Months 6-7:</strong> Facilitate department plan development, implement technology solutions, develop crisis management procedures</p>
+                        <p><strong>Month 8:</strong> Integrate department plans, finalize documentation, prepare training materials</p>
+                    </div>
+
+                    <div class="timeline-item">
+                        <h3>Phase 3: Implementation & Training (Months 9-11)</h3>
+                        <p><strong>Month 9:</strong> Deploy technology infrastructure, launch training programs, implement notification systems</p>
+                        <p><strong>Month 10:</strong> Conduct coordinator training, complete employee awareness, establish alternate sites</p>
+                        <p><strong>Month 11:</strong> Finalize vendor agreements, complete procedure documentation, prepare for testing phase</p>
+                    </div>
+
+                    <div class="timeline-item">
+                        <h3>Phase 4: Testing & Refinement (Month 12)</h3>
+                        <p><strong>Month 12:</strong> Execute testing program, conduct gap analysis, implement improvements, transition to maintenance phase</p>
+                        <p><strong>Ongoing:</strong> Maintenance and continuous improvement cycles</p>
+                    </div>
+                </div>
+
+                <div class="grid" style="margin-top: 40px;">
+                    <div class="card">
+                        <h3>🎯 Testing Schedule</h3>
+                        <p><strong>Q1 2023:</strong> Cyber Attack Tabletop Exercise - Ransomware scenario targeting EHR systems</p>
+                        <p><strong>Q2 2023:</strong> Data Center Failover Test - Primary data center failure simulation</p>
+                        <p><strong>Q3 2023:</strong> Pandemic Response Exercise - Infectious disease outbreak scenario</p>
+                        <p><strong>Q4 2023:</strong> Full-Scale Multi-Hazard Exercise - Hurricane with cascading failures</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>📚 Training Calendar</h3>
+                        <p><strong>Q1:</strong> BCP coordinator certification program (3-day intensive)</p>
+                        <p><strong>Q2:</strong> Department-specific plan development training</p>
+                        <p><strong>Q3:</strong> All-employee awareness campaign launch</p>
+                        <p><strong>Q4:</strong> Executive crisis management workshop</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Architecture Tab -->
+            <div id="architecture" class="tab-content">
+                <h2 class="section-title">IT Architecture & Recovery Strategy</h2>
+                
+                <div class="process-diagram">
+                    <h3 style="margin-bottom: 20px; color: #1e293b; text-align: center;">🏗️ Disaster Recovery Architecture</h3>
+                    <div class="process-flow">
+                        <div class="process-step">
+                            <h4>🏢 Primary Site</h4>
+                            <p>Boston Data Center</p>
+                            <small>Production Systems</small>
+                        </div>
+                        <div class="process-step">
+                            <h4>🔄 Secondary Site</h4>
+                            <p>Hartford Data Center</p>
+                            <small>Real-time Replication</small>
+                        </div>
+                        <div class="process-step">
+                            <h4>☁️ Cloud Primary</h4>
+                            <p>AWS Infrastructure</p>
+                            <small>Backup & DR Testing</small>
+                        </div>
+                        <div class="process-step">
+                            <h4>🌐 Cloud Secondary</h4>
+                            <p>Azure Infrastructure</p>
+                            <small>Additional Redundancy</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <div class="card">
+                        <h3>🏢 Primary Data Center - Boston</h3>
+                        <p><strong>Location:</strong> 123 Technology Drive, Boston, MA</p>
+                        <p><strong>Critical Systems:</strong></p>
+                        <ul>
+                            <li>Electronic Health Records (EHR)</li>
+                            <li>Claims Processing System</li>
+                            <li>Member Portal & Services</li>
+                            <li>Patient Care Systems</li>
+                            <li>Telemedicine Platform</li>
+                        </ul>
+                        <p><strong>Recovery Strategy:</strong> Automatic failover to Hartford secondary site</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>🔄 Secondary Data Center - Hartford</h3>
+                        <p><strong>Location:</strong> 456 Recovery Lane, Hartford, CT</p>
+                        <p><strong>Capability:</strong> Full production capacity within 2 hours</p>
+                        <p><strong>Synchronization:</strong> Real-time data replication</p>
+                        <p><strong>Failover:</strong> Automated with manual override capability</p>
+                        <p><strong>Capacity:</strong> 100% of primary site processing power</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>☁️ Cloud Infrastructure</h3>
+                        <p><strong>Primary Cloud (AWS):</strong></p>
+                        <ul>
+                            <li>SaaS applications hosting</li>
+                            <li>Backup storage solutions</li>
+                            <li>Disaster recovery testing environment</li>
+                            <li>Automated scaling capabilities</li>
+                        </ul>
+                        <p><strong>Secondary Cloud (Azure):</strong></p>
+                        <ul>
+                            <li>Additional redundancy layer</li>
+                            <li>Cross-cloud failover options</li>
+                            <li>Geo-distributed backups</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>⚡ Recovery Procedures</h3>
+                        <p><strong>Phase 1 (0-2 hours):</strong> Immediate response, damage assessment, automated failover activation</p>
+                        <p><strong>Phase 2 (2-24 hours):</strong> Critical system restoration, data integrity validation, alternate site establishment</p>
+                        <p><strong>Phase 3 (24-72 hours):</strong> Extended recovery, normal operations resumption, backlog processing</p>
+                        <p><strong>Phase 4 (72+ hours):</strong> Full recovery completion, primary site return, post-incident review</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget Tab -->
+            <div id="budget" class="tab-content">
+                <h2 class="section-title">Budget Analysis</h2>
+                
+                <div class="budget-chart">
+                    <h3 style="margin-bottom: 25px; color: #1e293b;">💰 Year 1 Implementation Budget - $5,000,000</h3>
+                    
+                    <div class="budget-item">
+                        <span><strong>Technology Infrastructure</strong></span>
+                        <div class="budget-bar">
+                            <div class="budget-fill" style="width: 56%;"></div>
+                        </div>
+                        <span><strong>$2,800,000</strong></span>
+                    </div>
+                    
+                    <div class="budget-item">
+                        <span><strong>Personnel Costs</strong></span>
+                        <div class="budget-bar">
+                            <div class="budget-fill" style="width: 25%;"></div>
+                        </div>
+                        <span><strong>$1,250,000</strong></span>
+                    </div>
+                    
+                    <div class="budget-item">
+                        <span><strong>Consulting Services</strong></span>
+                        <div class="budget-bar">
+                            <div class="budget-fill" style="width: 9%;"></div>
+                        </div>
+                        <span><strong>$450,000</strong></span>
+                    </div>
+                    
+                    <div class="budget-item">
+                        <span><strong>Training & Exercises</strong></span>
+                        <div class="budget-bar">
+                            <div class="budget-fill" style="width: 7%;"></div>
+                        </div>
+                        <span><strong>$350,000</strong></span>
+                    </div>
+                    
+                    <div class="budget-item">
+                        <span><strong>Documentation & Tools</strong></span>
+                        <div class="budget-bar">
+                            <div class="budget-fill" style="width: 3%;"></div>
+                        </div>
+                        <span><strong>$150,000</strong></span>
+                    </div>
+                </div>
+
+                <div class="budget-chart">
+                    <h3 style="margin-bottom: 25px; color: #1e293b;">📊 Annual Maintenance Budget - $2,000,000</h3>
+                    
+                    <div class="budget-item">
+                        <span><strong>Personnel Costs</strong></span>
+                        <div class="budget-bar">
+                            <div class="budget-fill" style="width: 42.5%;"></div>
+                        </div>
+                        <span><strong>$850,000</strong></span>
+                    </div>
+                    
+                    <div class="budget-item">
+                        <span><strong>Technology Maintenance</strong></span>
+                        <div class="budget-bar">
+                            <div class="budget-fill" style="width: 32.5%;"></div>
+                        </div>
+                        <span><strong>$650,000</strong></span>
+                    </div>
+                    
+                    <div class="budget-item">
+                        <span><strong>Testing & Exercises</strong></span>
+                        <div class="budget-bar">
+                            <div class="budget-fill" style="width: 12.5%;"></div>
+                        </div>
+                        <span><strong>$250,000</strong></span>
+                    </div>
+                    
+                    <div class="budget-item">
+                        <span><strong>Training Programs</strong></span>
+                        <div class="budget-bar">
+                            <div class="budget-fill" style="width: 7.5%;"></div>
+                        </div>
+                        <span><strong>$150,000</strong></span>
+                    </div>
+                    
+                    <div class="budget-item">
+                        <span><strong>Continuous Improvement</strong></span>
+                        <div class="budget-bar">
+                            <div class="budget-fill" style="width: 5%;"></div>
+                        </div>
+                        <span><strong>$100,000</strong></span>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <div class="card">
+                        <h3>👥 Resource Requirements</h3>
+                        <p><strong>Personnel:</strong></p>
+                        <ul>
+                            <li>6 FTE BCP/DRP team members</li>
+                            <li>47 part-time department coordinators (20% allocation)</li>
+                            <li>Executive steering committee (10% allocation)</li>
+                        </ul>
+                        <p><strong>Technology:</strong></p>
+                        <ul>
+                            <li>BCP management software platform</li>
+                            <li>Emergency notification system</li>
+                            <li>Alternate data center facilities</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>📈 ROI Projections</h3>
+                        <p><strong>Risk Mitigation Value:</strong></p>
+                        <ul>
+                            <li>Annual cyber attack risk reduction: $532,000</li>
+                            <li>Pandemic response capability: $283,500</li>
+                            <li>Data center outage protection: $200,000</li>
+                        </ul>
+                        <p><strong>Total Annual Risk Reduction:</strong> $1,015,500</p>
+                        <p><strong>3-Year ROI:</strong> 203%</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPIs Tab -->
+            <div id="metrics" class="tab-content">
+                <h2 class="section-title">Key Performance Indicators</h2>
+                
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-number">>95%</div>
+                        <div class="kpi-label">Plan Currency Rate</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-number">>90%</div>
+                        <div class="kpi-label">Exercise Participation</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-number">>95%</div>
+                        <div class="kpi-label">Training Completion</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-number">>85%</div>
+                        <div class="kpi-label">RTO Achievement</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-number"><30min</div>
+                        <div class="kpi-label">Incident Response Time</div>
+                    </div>
+                </div>
+
+                <div class="grid" style="margin-top: 40px;">
+                    <div class="card">
+                        <h3>📊 Maintenance Schedule</h3>
+                        <p><strong>Monthly Reviews:</strong></p>
+                        <ul>
+                            <li>Contact information updates</li>
+                            <li>Vendor agreement validations</li>
+                            <li>System configuration changes</li>
+                        </ul>
+                        <p><strong>Quarterly Reviews:</strong></p>
+                        <ul>
+                            <li>Business Impact Analysis updates</li>
+                            <li>Risk assessment revisions</li>
+                            <li>Procedure modifications</li>
+                        </ul>
+                        <p><strong>Annual Reviews:</strong></p>
+                        <ul>
+                            <li>Complete plan revision</li>
+                            <li>Strategy reassessment</li>
+                            <li>Compliance validation</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>🎯 Success Factors</h3>
+                        <ul>
+                            <li><strong>Executive Sponsorship:</strong> Active CEO and board engagement</li>
+                            <li><strong>Cultural Integration:</strong> BCP embedded in organizational culture</li>
+                            <li><strong>Resource Commitment:</strong> Adequate funding and staffing</li>
+                            <li><strong>Stakeholder Engagement:</strong> Department ownership and participation</li>
+                            <li><strong>Continuous Improvement:</strong> Regular updates and enhancements</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>⚠️ Risk Mitigation</h3>
+                        <p><strong>Inadequate Engagement:</strong> Executive mandate and performance metrics</p>
+                        <p><strong>Budget Constraints:</strong> Phased implementation and ROI demonstration</p>
+                        <p><strong>Technology Complexity:</strong> Vendor partnerships and expert consultation</p>
+                        <p><strong>Regulatory Non-compliance:</strong> Regular audits and legal review</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>📈 Testing Metrics</h3>
+                        <p><strong>Test Types & Frequency:</strong></p>
+                        <ul>
+                            <li>Notification Tests - Monthly</li>
+                            <li>Tabletop Exercises - Quarterly</li>
+                            <li>Functional Exercises - Semi-annually</li>
+                            <li>Full-Scale Exercises - Annually</li>
+                        </ul>
+                        <p><strong>Success Criteria:</strong> 100% test completion rate with >90% participant satisfaction</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const navItems = document.querySelectorAll('.nav-item');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const targetTab = this.getAttribute('data-tab');
+
+                    // Remove active class from all nav items and tab contents
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+
+                    // Add active class to clicked nav item and corresponding tab content
+                    this.classList.add('active');
+                    document.getElementById(targetTab).classList.add('active');
+
+                    // Animate budget bars when budget tab is shown
+                    if (targetTab === 'budget') {
+                        setTimeout(() => {
+                            const budgetFills = document.querySelectorAll('.budget-fill');
+                            budgetFills.forEach(fill => {
+                                const width = fill.style.width;
+                                fill.style.width = '0%';
+                                setTimeout(() => {
+                                    fill.style.width = width;
+                                }, 100);
+                            });
+                        }, 200);
+                    }
+                });
+            });
+
+            // Initialize budget bar animations
+            setTimeout(() => {
+                const budgetFills = document.querySelectorAll('.budget-fill');
+                budgetFills.forEach(fill => {
+                    const width = fill.style.width;
+                    fill.style.width = '0%';
+                    setTimeout(() => {
+                        fill.style.width = width;
+                    }, Math.random() * 1000 + 500);
+                });
+            }, 1000);
+        });
+
+        // Add smooth scrolling for better UX
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelector('.content').scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
